@@ -1,0 +1,6 @@
+name = Tags Terms
+description = Alters the URI of taxonomy terms with the machine name tags.
+package = Taxonomy
+dependencies[] = taxonomy
+core = 7.x
+files[] = tags_terms.module

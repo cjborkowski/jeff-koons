@@ -1,0 +1,6 @@
+name = CR Register
+description = Conservation Reel registration features
+core = 7.x
+
+files[] = cr_register.module
+

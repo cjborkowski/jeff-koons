@@ -1,0 +1,19 @@
+diff --git a/styles.module b/styles.module
+index ade41d4..afabcd9
+--- a/styles.module
++++ b/styles.module
+@@ -46,7 +46,13 @@ function styles_field_formatter_view($entity_type, $entity, $field, $instance, $
+     //   Image fields, this is a fully loaded file object, because
+     //   file_field_load() loads the referenced file and merges its properties
+     //   into $item, but for other field types, it may simply be raw field data.
+-    $element[$delta] = array('#markup' => theme('styles_field_formatter', array('element' => $element, 'object' => (object) $item, 'delta' => $delta, 'entity' => $entity)));
++    if (isset($item['file']) && is_object($item['file'])) {
++      $object = $item['file'];
++    }
++    else {
++      $object = (object) $item;
++    }
++    $element[$delta] = array('#markup' => theme('styles_field_formatter', array('element' => $element, 'object' => $object, 'delta' => $delta, 'entity' => $entity)));
+   }
+   return $element;
+ }

@@ -1,0 +1,13 @@
+<?php
+function cr_register_user_insert(&$edit, $account, $category) {
+    $node = new stdClass();
+    $node->type = 'institution';
+    node_object_prepare($node);
+    $node->language = LANGUAGE_NONE;
+    $node->uid = $account->uid;
+    $node->name = $account->name;
+    $node->title = check_plain($account->field_affiliation['und'][0]['value']);
+    $node->status = 1;
+    node_save($node);
+    watchdog('cr_register',"New institution node @name created.", array('@name' => $node->title));
+}

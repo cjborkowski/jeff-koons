@@ -1,0 +1,38 @@
+.exhibitions {
+	width: 510 px;
+}
+
+.exhibitionheadertype {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-style: normal;
+	line-height: bold;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: uppercase;
+	color: #999999;
+}
+
+em {
+font-style: italic !important;
+}
+
+#node-53 a:link,
+#node-53 a:visited,
+.node-artwork a,
+.node-artwork a:link,
+.node-artwork a:visited,
+.node-bibliography a,
+.node-bibliography a:link,
+.node-bibliography a:visited,
+.jeffkoons-artwork-accordion a,
+.jeffkoons-artwork-accordion a:link
+.jeffkoons-artwork-accordion a:visited{
+        color: #6699CC !important;
+        font-family: Arial, Helvetica, sans-serif; 
+        font-size: 11px;   
+        font-style: normal;
+        line-height: normal;
+        font-weight: normal;
+        font-variant: normal;
+}

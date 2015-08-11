@@ -1,0 +1,456 @@
+/**
+ * Provides the ability to fix a html block to a position on the page when the
+ * browser is scroled.
+ *
+ * This code is based on tableheader.js
+ */
+(function ($) {
+
+Drupal.blockFloatStack = function() {
+  if( typeof Drupal.blockFloatStack.blocks == 'undefined' ) {
+    Drupal.blockFloatStack.blocks = [];
+  }
+  return Drupal.blockFloatStack.blocks;
+}
+
+/**
+ * Attaches the floating_block behavior.
+ */
+Drupal.behaviors.blockFloat = {
+  attach: function (context) {
+
+    var settings = Drupal.settings.floating_block;
+
+    // This breaks in anything less than IE 7. Prevent it from running.
+    if ($.browser.msie && parseInt($.browser.version, 10) < 7) {
+      return;
+    }
+
+    // If this behaviour is being called as part of processing an ajax callback.
+    if (jQuery.isFunction(context.parent)) {
+      context = context.parent();
+    }
+
+    // Cycle through all of the blocks we want to float.
+    $.each(settings, function (selector, setting) {
+      // The format of a select is [float]|[container] where:
+      // [float] is the jQuery selector of thing you want to stay on screen
+      // [container] is the jQuery selector of container that defines a boundary
+      // not to float outside of.
+      $(selector.toString() + ':not(.blockFloat-processed)', context).each(function (j, block) {
+        // Store information about the block to float.
+        var blockInfo = [];
+        blockInfo.original_css = [];
+        blockInfo.original_css.left = Drupal.blockFloatCleanCSSValue($(block).css('left'));
+        blockInfo.original_css.top = Drupal.blockFloatCleanCSSValue($(block).css('top'));
+        blockInfo.original_css.position = $(block).css("position");
+        blockInfo.floating = false;
+        blockInfo.reset = true;
+        blockInfo.original_identifier = 'blockFloat-' +  Drupal.blockFloatStack().length;
+
+        // Store the selector for the container if it exists.
+        if (setting.container && $(setting.container.toString()).length > 0) {
+          blockInfo.container = setting.container;
+        }
+
+        if (setting.padding_top) {
+          blockInfo.padding_top = setting.padding_top;
+        }
+        else {
+          blockInfo.padding_top = 0;
+        }
+
+        if (setting.padding_bottom) {
+          blockInfo.padding_bottom = setting.padding_bottom;
+        }
+        else {
+          blockInfo.padding_bottom = 0;
+        }
+
+        // Fix the width of the block as often a block will be 100% of it's
+        // container. This ensures that when it's floated it will keep it's
+        // original width. There is no point using .css('width') as this will
+        // return the computed value so we might as well just set it.
+        $(block).width($(block).width());
+
+        // Add class to block to indicate that we're done and give
+        // Drupal.blockFloatTracker a certain way to identify the block.
+        $(block).addClass('blockFloat-processed ' + blockInfo.original_identifier);
+
+        // If the page loaded has already been scrolled calling
+        // Drupal.blockFloatTracker will float the block if necessary.
+        Drupal.blockFloatTracker(blockInfo);
+
+        // Store the block in the floating_blocks array.
+        Drupal.blockFloatStack().push(blockInfo);
+      });
+    });
+  }
+}
+
+/**
+ * Function that calculates whether or not the block should be floated.
+ */
+Drupal.blockFloatTracker = function (blockInfo) {
+  // Save positioning data.
+  var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+  var block = $('.' + blockInfo.original_identifier);
+  if (block.length == 0) {
+    // The floated block must have been removed from the page - do nothing.
+    return;
+  }
+
+  // (Re)calculate some values if necessary.
+  if (blockInfo.scrollHeight != scrollHeight || blockInfo.reset) {
+    if (blockInfo.reset) {
+      // Reset block so we can calculate new offset.
+      Drupal.blockFloatResetPosition(block, blockInfo);
+      blockInfo.original_offset = $(block).offset();
+
+      // Reset completed - set value so we don't do unnecessary resets.
+      blockInfo.reset = false;
+    }
+
+    // Save the scrollHeight - if this changes we will need to recalculate.
+    blockInfo.scrollHeight = scrollHeight;
+    // The minimum offset is always defined by the blocks starting position.
+    blockInfo.minOffset = blockInfo.original_offset.top - blockInfo.padding_top;
+
+    // Calulate the maxOffset which depends on whether or not a container is
+    // defined. Otherwise use the scrollHeight.
+    if (blockInfo.container) {
+      blockInfo.maxOffset = $(blockInfo.container).height() + $(blockInfo.container).offset().top - blockInfo.padding_bottom;
+    }
+    else {
+      blockInfo.maxOffset = scrollHeight;
+    }
+  }
+
+  // Track positioning relative to the viewport and set position.
+  var vScroll = (document.documentElement.scrollTop || document.body.scrollTop);
+  if (vScroll > blockInfo.minOffset) {
+    var topPosition = blockInfo.padding_top;
+    // Block height can change if there a collapsible fields etc... inside the
+    // block so recalculate everytime we are floating the block.
+    var blockHeight = block.height();
+    // Don't let the bottom of the block go beneath maxOffset.
+    if ((vScroll + blockHeight) > blockInfo.maxOffset) {
+      // At this point topPosition will become a negative number to keep the
+      // block from going out of the defined container.
+      topPosition = blockInfo.maxOffset - vScroll - blockHeight;
+    }
+
+    block.css({
+      left:  blockInfo.original_offset.left + 'px',
+      position: 'fixed',
+      top: topPosition + 'px'
+    }).addClass('floating-block-active');
+
+    blockInfo.floating = true;
+  }
+  else {
+    // Put the block back in it's original postion
+    Drupal.blockFloatResetPosition(block, blockInfo);
+  }
+}
+
+/**
+ * Resets the position of a floated block back to non floated position.
+ */
+Drupal.blockFloatResetPosition = function (block, blockInfo) {
+  if (blockInfo.floating) {
+    block.css({
+      left: blockInfo.original_css.left,
+      position: blockInfo.original_css.position,
+      top: blockInfo.original_css.top
+    }).removeClass('floating-block-active');
+    blockInfo.floating = false;
+  }
+}
+
+/**
+ * If the css value is 0px for top and left then it is not actually set using
+ * CSS - this will be the computed value. Setting to a blank string will ensure
+ * that when Drupal.blockFloatResetPosition is called these css value will be
+ * unset.
+ */
+Drupal.blockFloatCleanCSSValue = function (cssvalue) {
+  if (cssvalue == '0px') {
+    cssvalue = '';
+  }
+  return cssvalue;
+}
+
+/**
+ * Callback to be added to the scroll event. Each time the user scrolls this
+ * function will be called.
+ */
+Drupal.blockFloatOnScroll = function() {
+  $(Drupal.blockFloatStack()).each(function () {
+    Drupal.blockFloatTracker(this);
+  });
+};
+
+/**
+ * Callback to be added to the resize event. Each time the user resizes the
+ * this window this function will be called. A timeout is used to prevent
+ * this function from causing a slow down during resizing.
+ */
+Drupal.blockFloatWindowResize = function() {
+  if( typeof Drupal.blockFloatWindowResize.timer == 'undefined' ) {
+    Drupal.blockFloatWindowResize.timer = false;
+  }
+  // Ensure minimum time between adjustments.
+  if (Drupal.blockFloatWindowResize.timer) {
+    return;
+  }
+  Drupal.blockFloatWindowResize.timer = setTimeout(function () {
+    $(Drupal.blockFloatStack()).each(function () {
+      this.reset = true;
+      Drupal.blockFloatTracker(this);
+    });
+    // Reset timer
+    Drupal.blockFloatWindowResize.timer = false;
+  }, 250);
+};
+
+/**
+ * Attach callbacks to resize and scroll events. Add a class to the body to
+ * prevent doing this multiple times.
+ */
+if (!$('body').hasClass('blockFloat-processed')) {
+  $('body').addClass('blockFloat-processed');
+  $(window).scroll(Drupal.blockFloatOnScroll);
+  $(document.documentElement).scroll(Drupal.blockFloatOnScroll);
+  $(window).resize(Drupal.blockFloatWindowResize);
+}
+
+})(jQuery);
+;
+// Image Node Auto-Format with Auto Image Grouping.
+// Original version by Steve McKenzie.
+// Altered by Stella Power for jQuery version.
+
+(function ($) {
+
+function parse_url(url, param) {
+  param = param.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+  url = url.replace(/&amp;/, "&");
+  var regexS = "[\\?&]"+param+"=([^&#]*)";
+  var regex = new RegExp(regexS);
+  var results = regex.exec(url);
+  if (results === null) {
+    return "";
+  }
+  else {
+    return results[1];
+  }
+}
+
+
+function lightbox2_init_triggers(classes, rel_type, custom_class) {
+  if (classes == '' || rel_type == 0) {
+    return;
+  }
+  var settings = Drupal.settings.lightbox2;
+
+  var link_target  = "";
+  if (settings.node_link_target !== 0) {
+    link_target = 'target="'+ settings.node_link_target +'"';
+  }
+
+  $("a:has("+classes+")").each(function(i) {
+    if ((!settings.disable_for_gallery_lists && !settings.disable_for_acidfree_gallery_lists) || (!$(this).parents("td.giAlbumCell").attr("class") && !$(this).parents(".galleries").length && !$(this).parents(".acidfree-folder").length && !$(this).parents(".acidfree-list").length) || ($(this).parents(".galleries").length && !settings.disable_for_gallery_lists) || (($(this).parents(".acidfree-folder").length || $(this).parents(".acidfree-list").length) && !settings.disable_for_acidfree_gallery_lists)) {
+      var child = $(this).find(classes);
+      // Ensure the child has a class attribute we can work with.
+      if ($(child).attr("class")) {
+        // Set the alt text.
+        var alt = $(child).attr("alt");
+        if (!alt) {
+          alt = "";
+        }
+
+        // Set the image node link text.
+        var link_text = settings.node_link_text;
+        var download_link_text = settings.download_link_text;
+        var rewrite = 1;
+
+        // Set the rel attribute.
+        var rel = "lightbox";
+        var lightframe = false;
+        if (rel_type == "lightframe_ungrouped") {
+          rel = "lightframe[]";
+          lightframe = true;
+        }
+        else if (rel_type == "lightframe") {
+          lightframe = true;
+        }
+        else if (rel_type == "lightbox_ungrouped") {
+          rel = "lightbox[]";
+        }
+        if (rel_type != "lightbox_ungrouped" && rel_type != "lightframe_ungrouped") {
+          rel = rel_type + "[" + $(child).attr("class") + "]";
+        }
+
+        // Set the basic href attribute - need to ensure there's no language
+        // string (e.g. /en) prepended to the URL.
+        var id = null;
+        var href = $(child).attr("src");
+        var download = null;
+        var orig_href = $(this).attr("href");
+        var pattern = new RegExp(settings.file_path);
+        if (orig_href.match(pattern)) {
+          var lang_pattern = new RegExp(Drupal.settings.basePath + "\\w\\w\\/");
+          orig_href = orig_href.replace(lang_pattern, Drupal.settings.basePath);
+        }
+        var frame_href = orig_href;
+        // Handle flickr images.
+        if ($(child).attr("class").match("flickr-photo-img") ||
+          $(child).attr("class").match("flickr-photoset-img")) {
+          href = $(child).attr("src").replace("_s.", ".").replace("_t.", ".").replace("_m.", ".").replace("_b.", ".");
+          if (rel_type != "lightbox_ungrouped" && rel_type != "lightframe_ungrouped") {
+            rel = rel_type + "[flickr]";
+            if ($(child).parents("div.block-flickr").attr("class")) {
+              id = $(child).parents("div.block-flickr").attr("id");
+              rel = rel_type + "["+ id +"]";
+            }
+          }
+          download = href;
+        }
+
+        // Handle "image-img_assist_custom" images.
+        else if ($(child).filter("img[class*=img_assist_custom]").size()) {
+          // Image assist uses "+" signs for spaces which doesn't work for
+          // normal links.
+          if (settings.display_image_size != "original") {
+            orig_href = orig_href.replace(/\+/, " ");
+            href = $(child).attr("src").replace(new RegExp("\\.img_assist_custom-[0-9]+x[0-9]+"), ((settings.display_image_size === "")?settings.display_image_size:"."+ settings.display_image_size));
+            if (rel_type != "lightbox_ungrouped" && rel_type != "lightframe_ungrouped") {
+              rel = rel_type + "[node_images]";
+            }
+            if (lightframe) {
+              frame_href = orig_href + "/lightbox2";
+            }
+          }
+          else {
+            rewrite = 0;
+          }
+        }
+
+        // Handle "inline" images.
+        else if ($(child).attr("class").match("inline")) {
+          href = orig_href;
+        }
+
+        // Handle gallery2 block images.
+        else if ($(child).attr("class").match("ImageFrame_image") || $(child).attr("class").match("ImageFrame_none")) {
+          var thumb_id = parse_url(href, "g2_itemId");
+          var new_id = parse_url(orig_href, "g2_itemId");
+          if (new_id && thumb_id) {
+            var g2pattern = new RegExp("g2_itemId="+thumb_id);
+            var replacement = "g2_itemId="+ new_id;
+            href = href.replace(g2pattern, replacement);
+          }
+          rel = rel_type + "[gallery2]";
+          if ($(child).parents("div.block-gallery").attr("class")) {
+            id = $(child).parents("div.block-gallery").attr("id");
+            rel = rel_type + "["+ id +"]";
+          }
+          download = href;
+        }
+
+
+        // Set the href attribute.
+        else if (settings.image_node_sizes != '()' && !custom_class) {
+          if (settings.display_image_size != "original") {
+            href = $(child).attr("src").replace(new RegExp(settings.image_node_sizes), ((settings.display_image_size === "")?settings.display_image_size:"."+ settings.display_image_size)).replace(/(image\/view\/\d+)(\/[\w\-]*)/, ((settings.display_image_size === "")?"$1/_original":"$1/"+ settings.display_image_size));
+            if (rel_type != "lightbox_ungrouped" && rel_type != "lightframe_ungrouped") {
+              rel = rel_type + "[node_images]";
+              if ($(child).parents("div.block-multiblock,div.block-image").attr("class")) {
+                id = $(child).parents("div.block-multiblock,div.block-image").attr("id");
+                rel = rel_type + "["+ id +"]";
+              }
+            }
+            download = $(child).attr("src").replace(new RegExp(settings.image_node_sizes), "").replace(/(image\/view\/\d+)(\/[\w\-]*)/, "$1/_original");
+            if (lightframe) {
+              frame_href = orig_href + "/lightbox2";
+            }
+          }
+          else {
+            rewrite = 0;
+          }
+        }
+        // Modify the image url.
+        var img_title = $(child).attr("title");
+        if (!img_title) {
+          img_title = $(this).attr("title");
+          if (!img_title) {
+            img_title = $(child).attr("alt");
+          }
+          $(child).attr({title: img_title});
+        }
+        if (lightframe) {
+          href = frame_href;
+        }
+        if (rewrite) {
+          if (!custom_class) {
+            var title_link = "";
+            if (link_text.length) {
+              title_link = "<br /><br /><a href=\"" + orig_href + "\" id=\"lightbox2-node-link-text\" "+ link_target +" >"+ link_text + "</a>";
+            }
+            if (download_link_text.length && download) {
+              title_link = title_link + " - <a href=\"" + download + "\" id=\"lightbox2-download-link-text\" target=\"_blank\">" + download_link_text + "</a>";
+            }
+            rel = rel + "[" + img_title + title_link + "]";
+            $(this).attr({
+              rel: rel,
+              href: href
+            });
+          }
+          else {
+            if (rel_type != "lightbox_ungrouped" && rel_type != "lightframe_ungrouped") {
+              rel = rel_type + "[" + $(child).attr("class") + "]";
+              if ($(child).parents("div.block-image").attr("class")) {
+                id = $(child).parents("div.block-image").attr("id");
+                rel = rel_type + "["+ id +"]";
+              }
+            }
+            rel = rel + "[" + img_title + "]";
+            $(this).attr({
+              rel: rel,
+              href: orig_href
+            });
+          }
+        }
+      }
+    }
+
+  });
+}
+
+function lightbox2_image_nodes() {
+  var settings = Drupal.settings.lightbox2;
+
+  // Don't do it on the image assist popup selection screen.
+  var img_assist = document.getElementById("img_assist_thumbs");
+  if (!img_assist) {
+
+    // Select the enabled image types.
+    lightbox2_init_triggers(settings.trigger_lightbox_classes, "lightbox_ungrouped");
+    lightbox2_init_triggers(settings.custom_trigger_classes, settings.custom_class_handler, true);
+    lightbox2_init_triggers(settings.trigger_lightbox_group_classes, "lightbox");
+    lightbox2_init_triggers(settings.trigger_slideshow_classes, "lightshow");
+    lightbox2_init_triggers(settings.trigger_lightframe_classes, "lightframe_ungrouped");
+    lightbox2_init_triggers(settings.trigger_lightframe_group_classes, "lightframe");
+  }
+}
+
+Drupal.behaviors.initAutoLightbox = {
+  attach: function(context, settings) {
+    lightbox2_image_nodes();
+  }
+};
+
+//End jQuery block
+}(jQuery));
+;

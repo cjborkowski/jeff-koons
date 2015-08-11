@@ -1,0 +1,28 @@
+diff --git a/drupal/sites/all/modules/jw_player/jw_player.module b/drupal/sites/all/modules/jw_player/jw_player.module
+index 50ff2da..04c376b 100755
+--- a/drupal/sites/all/modules/jw_player/jw_player.module
++++ b/drupal/sites/all/modules/jw_player/jw_player.module
+@@ -58,7 +58,10 @@ function jw_player_field_formatter_info() {
+   $formatters = array(
+     'jw_player' => array(
+       'label' => t('JW player'),
+-      'field types' => array('file'),
++      'field types' => array(
++        'file',
++        'video',
++      ),
+       'settings' => array(
+         'jwplayer_preset' => '',
+       ),
+@@ -164,6 +167,11 @@ function jw_player_field_formatter_view($entity_type, $entity, $field, $instance
+       $files[$delta] = (object) $item;
+     }
+     foreach ($files as $delta => $file) {
++      // Support transcoded videos
++      if (module_exists('video') && isset($file->playablefiles)) {
++        $file = $file->playablefiles[0];
++      }
++
+       $element[$delta] = array(
+         '#theme' => 'jw_player',
+         '#file_object' => $file,

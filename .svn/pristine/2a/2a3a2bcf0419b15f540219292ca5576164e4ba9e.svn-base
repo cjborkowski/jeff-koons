@@ -1,0 +1,11 @@
+/*custom css for nodes & views */
+
+/*views */
+
+/* Libray views */
+/*Header */
+
+#views-library-sort-options ul li {
+display: inline;
+list-style-type: none;
+}

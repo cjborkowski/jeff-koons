@@ -1,0 +1,22 @@
+diff --git a/term_merge.module b/term_merge.module
+index d78d3fb..f25d896 100644
+--- a/term_merge.module
++++ b/term_merge.module
+@@ -315,7 +315,7 @@ function term_merge($source, $dest, $keep_merged) {
+     'title' => t('Merging terms'),
+     'operations' => array(
+       array('_term_merge_batch_store_merged_terms', array(
+-        $keep_merged ? array() : $source,
++        $keep_merged ? array() : array_diff($source, array($dest)),
+         count($source),
+       ))
+     ),
+@@ -545,7 +545,7 @@ function _term_merge_get_confirm_merge_markup($form_state) {
+     $output .= 'Due to your choice, the merged terms will not be deleted from their vocabulary.<br />&nbsp;';
+   }
+   else {
+-    $output .= '<br /><u>All merged terms will be deleted</u>!<br />&nbsp;';
++    $output .= '<br /><u>All merged terms (other than destination) will be deleted</u>!<br />&nbsp;';
+   }
+ 
+   $output = t($output, array('%term_names' => $merged_names, '%destination_term' => $dest_term_name));
