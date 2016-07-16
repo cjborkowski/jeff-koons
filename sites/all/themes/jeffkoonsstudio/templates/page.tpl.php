@@ -126,7 +126,7 @@ margin:0 auto;
 }
 </style>
 <div id="front-page-wrapper"><div id="front-page-inner-wrapper">
-<a href="/artwork/inflatables"  onMouseOver="document.enter.src=enter_2.src;return true" onMouseOut="document.enter.src=enter_1.src;return true"><img src="/sites/default/files/splash.jpg" name="enter" border="0"></a></div></div>
+<a href="/artwork/inflatables/inflatable-flower-and-bunny-tall-white-pink-bunny"  onMouseOver="document.enter.src=enter_2.src;return true" onMouseOut="document.enter.src=enter_1.src;return true"><img src="/sites/default/files/splash.jpg" name="enter" border="0"></a></div></div>
 
 <?php } else { ?>
 
