@@ -46,7 +46,7 @@ jQuery(document).ready(function($) {
  $('a[href="/artwork/inflatables/inflatable-flower-and-bunny-tall-white-pink-bunny"]').addClass('jeffkoons-active-link active');
  }
 
- if (currentURL==“/artwork/inflatables/five-double-sided-floor-mirrors-inflatable-flowers-short-blue-short-orange-short"){
+ if (currentURL=="/artwork/inflatables/five-double-sided-floor-mirrors-inflatable-flowers-short-blue-short-orange-short"){
  $('a[href="/artwork/inflatables/five-double-sided-floor-mirrors-inflatable-flowers-short-blue-short-orange-short"]').addClass('jeffkoons-active-link active');
  }  
  
