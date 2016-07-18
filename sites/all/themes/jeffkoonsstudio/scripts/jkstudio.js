@@ -10,7 +10,7 @@ jQuery(document).ready(function($) {
  $("a[href='/artwork/split-rocker']").text('SPLIT-ROCKER');
 
  var str = $('.sidetypebig').text();
- console.log ('sidetypebig is: '+str);
+ //console.log ('sidetypebig is: '+str);
  var safeTitle = new Array("pre-new","split-rocker");
  
  if (str == "luxury-degradation") {
@@ -31,35 +31,22 @@ jQuery(document).ready(function($) {
  $('.jeffkoons-studio-artwork-title').show();
  
  var currentURL = window.location.pathname;
- //console.log ('currentURL is' +currentURL);
+// console.log ('currentURL is: ' +currentURL);
  var pathArray = window.location.pathname.split( '/' );
- //console.log ('pathArray lenght is: '+pathArray.length);
- //console.log('path is: ' +pathArray[1] +' and '+ pathArray[2]);
+// console.log ('pathArray lenght is: '+pathArray.length);
+// console.log('path is: ' +pathArray[1] +' and '+ pathArray[2]);
  
  //now drill down
  $('a[href="/'+pathArray[1]+'"]').addClass('jeffkoons-active-link active');
  $('a[href="/'+pathArray[1]+'/'+pathArray[2]+'"]').addClass('jeffkoons-active-link active');
  $('a[href="/'+pathArray[1]+'/'+pathArray[2]+'/'+pathArray[3]+'"]').addClass('jeffkoons-active-link active');
- 
- //for certain pages
- if (currentURL=="/artwork/inflatables"){
- $('a[href="/artwork/inflatables/inflatable-flower-and-bunny-tall-white-pink-bunny"]').addClass('jeffkoons-active-link active');
- }
 
- if (currentURL=="/artwork/inflatables/five-double-sided-floor-mirrors-inflatable-flowers-short-blue-short-orange-short"){
- $('a[href="/artwork/inflatables/five-double-sided-floor-mirrors-inflatable-flowers-short-blue-short-orange-short"]').addClass('jeffkoons-active-link active');
- }  
- 
- //artwork
- if (currentURL.indexOf('artwork') >-1 && pathArray.length >=2 ){
- //console.log ('we have artwork');
- $('.artwork-right-menu-items-link a').first().addClass('jeffkoons-active-link active');
+ //certain pages
+ if (currentURL == "/artwork/inflatables/five-double-sided-floor-mirrors-inflatable-flowers" || currentURL == "/artwork/inflatables"){
+ //console.log("we got 5 sided url and attaching to a: " +currentURL);
+ $('artwork-right-menu-items-link a').first().addClass('active jeffkoons-active-link');
+ $('a[href="/artwork/inflatables/five-double-sided-floor-mirrors-inflatable-flowers"]').addClass('active jeffkoons-active-link');
  } 
-
-if (currentURL.indexOf('artwork') >-1 && pathArray.length >=4 ){
- //console.log ('we have artwork and a long URL so we are removing certain classes on <a> tags.');
- $('.artwork-right-menu-items-link a').first().removeClass('jeffkoons-active-link active');
- }
 
  //biography
  if (currentURL.indexOf('biography-') >-1){
@@ -86,14 +73,12 @@ console.log ('we have current group exhibitions so go even deeper');
  $('.menu-606 a').addClass('jeffkoons-active-link active');
  }
  
-
 //bibliography-
  if (currentURL.indexOf('bibliography-') >-1){
  //console.log ('we have bibliography-');
  $('.menu-670 a').addClass('jeffkoons-active-link active');
  }
   
- 
 //UI section
 
 $( '.jeffkoons-artwork-accordion ').accordion({
