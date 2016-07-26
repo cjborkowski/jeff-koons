@@ -3,13 +3,17 @@ jQuery(document).ready(function($) {
 // Code that uses jQuery's $ can follow here.
 //console.log ('jkstudio.js loaded !');
 
-// String manipulation
+// String manipulation For Artwork with special titles that may cause trouble in URL segments
  $("a[href='/artwork/luxury-degradation']").attr('href', '/artwork/luxury-degradation').text('LUXURY & DEGRADATION');
  $('.jeffkoons-artwork-thumbnails span.image-field-caption').hide();
  $("a[href='/artwork/pre-new']").text('PRE-NEW');
  $("a[href='/artwork/split-rocker']").text('SPLIT-ROCKER');
+ $("a[href='/artwork/titi-stainless']").text('TITI (STAINLESS)');
+ $("a[href='/artwork/popeye-stainless']").text('POPEYE (STAINLESS)');
+ $("a[href='/artwork/popeye-granite']").text('POPEYE (GRANITE)');
 
  var str = $('.sidetypebig').text();
+ //console.log(str);
  //console.log ('sidetypebig is: '+str);
  var safeTitle = new Array("pre-new","split-rocker");
  
@@ -20,12 +24,12 @@ jQuery(document).ready(function($) {
  } else {
  var fix = str.replace(/-/g,' ');
  }
- 
+
  //console.log ('sidetypebig change to: '+fix);
  $('.sidetypebig').html(fix);
  
  var title = $('.jeffkoons-artwork-title');
- //console.log (title);
+ //console.log ('title is : '+ title);
  $('.jeffkoons-artwork-title').hide();
  $('.image-field-caption').prepend(title);
  $('.jeffkoons-studio-artwork-title').show();
