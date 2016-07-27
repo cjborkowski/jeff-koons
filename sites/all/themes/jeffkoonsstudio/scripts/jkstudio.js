@@ -54,6 +54,12 @@ jQuery(document).ready(function($) {
  $('a[href="/'+pathArray[1]+'/'+pathArray[2]+'"]').addClass('jeffkoons-active-link active');
  $('a[href="/'+pathArray[1]+'/'+pathArray[2]+'/'+pathArray[3]+'"]').addClass('jeffkoons-active-link active');
 
+//for artwork landing pages
+if (pathArray[1] == 'artwork' && pathArray[2] && !pathArray[3]){
+	//console.log('we have artwork with only 2 url segments');
+	$('.artwork-right-menu-items-link > a').first().addClass('jeffkoons-active-link active');
+}
+
  //certain pages
  if (currentURL == "/artwork/inflatables/five-double-sided-floor-mirrors-inflatable-flowers" || currentURL == "/artwork/inflatables"){
  //console.log("we got 5 sided url and attaching to a: " +currentURL);
