@@ -24,7 +24,16 @@ jQuery(document).ready(function($) {
  } else {
  var fix = str.replace(/-/g,' ');
  }
-
+ if (str == "titi-stainless") {
+ var fix = str.replace('titi-stainless', 'titi (stainless)');
+ }
+ if (str == "popeye-stainless") {
+ var fix = str.replace('popeye-stainless', 'popeye (stainless)');
+ }
+ if (str == "popeye-granite") {
+ var fix = str.replace('popeye-granite', 'popeye (granite)');
+ }
+ 
  //console.log ('sidetypebig change to: '+fix);
  $('.sidetypebig').html(fix);
  
