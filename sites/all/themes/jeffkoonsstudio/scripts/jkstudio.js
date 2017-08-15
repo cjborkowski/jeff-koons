@@ -11,6 +11,8 @@ jQuery(document).ready(function($) {
  $("a[href='/artwork/titi-stainless']").text('TITI (STAINLESS)');
  $("a[href='/artwork/popeye-stainless']").text('POPEYE (STAINLESS)');
  $("a[href='/artwork/popeye-granite']").text('POPEYE (GRANITE)');
+ $("a[href='/artwork/gazing-ball-bottlerack']").text('GAZING BALL (BOTTLERACK)');
+ $("a[href='/artwork/gazing-ball-stool']").text('GAZING BALL (STOOL)');
 
  var str = $('.sidetypebig').text();
  //console.log(str);
@@ -32,6 +34,12 @@ jQuery(document).ready(function($) {
  }
  if (str == "popeye-granite") {
  var fix = str.replace('popeye-granite', 'popeye (granite)');
+ }
+ if (str == "gazing-ball-bottlerack") {
+ var fix = str.replace('gazing-ball-bottlerack', 'gazing ball (bottlerack)');
+ }
+ if (str == "gazing-ball-stool") {
+ var fix = str.replace('gazing-ball-stool', 'gazing ball (stool)');
  }
  
  //console.log ('sidetypebig change to: '+fix);
