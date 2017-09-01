@@ -107,12 +107,11 @@ hide($content['field_light_box_image']);
 hide($content['field_literature']);
 hide($content['field_exhibitions']);
 hide($content['field_exhibitions_link']);
+
 ?>
-<!-- jeffkoons/templates/node--artwork.tpl.php --maters template file -->
+<!-- jeffkoons/templates/node-artwork.tpl.php  template file -->
 <article id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
   <?php print render($title_prefix); ?>
-
-  
 
   <?php if(!empty($user_picture) || $display_submitted): ?>
     <footer<?php print $footer_attributes; ?>>
@@ -122,13 +121,13 @@ hide($content['field_exhibitions_link']);
   <?php endif; ?>
 
   <div<?php print $content_attributes; ?>>
-    
-
-  <?php if ($content['field_light_box_image']) : ?>
+<?php if ($content['field_light_box_image']) : ?>
   <div class="jeffkoons-artwork-box-0">
   <?php print render ($content['field_light_box_image'][0]) ;?>
   </div>
-  <?php endif;?>
+<?php endif; ?>
+
+  
     <header<?php print $header_attributes; ?>>
      
         <span<?php print $title_attributes; ?>>

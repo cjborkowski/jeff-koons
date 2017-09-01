@@ -126,10 +126,10 @@ $smart_ip_session = smart_ip_session_get('smart_ip');
 
 <!-- start GEO IP lookup -->
 
-<?php echo '<!-- current GEO IP country: '. $smart_ip_session['location']['country_code'] . '-->';?>
+<?php echo '<!-- current GEO IP country: '. $smart_ip_session['location']['country_code'] . ' -->';?>
 
-<?php if ($smart_ip_session['location']['country_code'] == 'US') : ?>
-<!-- FR detected so do nothing -->
+<?php if ($smart_ip_session['location']['country_code'] == 'FR') : ?>
+<!-- FR detected so do nothing and hide image -->
 <?php else: ?>
 
 	<?php if ($content['field_light_box_image']) : ?>
