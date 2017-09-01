@@ -155,14 +155,13 @@ $smart_ip_session = smart_ip_session_get('smart_ip');
   	<h3>Details</h3>
   	<div class="jeffkoons-accordion-container">
   		<div class="jeffkoons-artwork-thumbnails">
-  		<!--views : artwork & detail_thumbnails argument:-->  		<!--views : artwork & detail_thumbnails argument:-->
+  		<!--views : artwork & detail_thumbnails argument:-->  
   		<?php echo '<!-- current GEO IP country: '. $smart_ip_session['location']['country_code'] . ' -->';?>
   		<?php if ($smart_ip_session['location']['country_code'] == 'FR') : ?>
 		<!-- FR detected so do nothing and hide image -->
 		<?php else: ?>
   		<?php print views_embed_view('artwork', 'detail_thumbnails', $node->nid); ?> 
-  		<?php endif; ?> 	
-  		<?php print views_embed_view('artwork', 'detail_thumbnails', $node->nid); ?>  	
+  		<?php endif; ?> 		
      <div style="clear:both;"></div>  	
   	</div><!-- end: jeffkoons-artwork-thumbnails -->
   	<div class="jeffkoons-artwork-exhibitions">
