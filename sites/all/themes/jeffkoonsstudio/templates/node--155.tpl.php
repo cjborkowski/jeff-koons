@@ -107,9 +107,11 @@ hide($content['field_light_box_image']);
 hide($content['field_literature']);
 hide($content['field_exhibitions']);
 hide($content['field_exhibitions_link']);
+$smart_ip_session = smart_ip_session_get('smart_ip');
+   
 
 ?>
-<!-- jeffkoons/templates/node-artwork.tpl.php  template file -->
+<!-- jeffkoons/templates/node-155.tpl.php  template file -->
 <article id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
   <?php print render($title_prefix); ?>
 
@@ -121,11 +123,22 @@ hide($content['field_exhibitions_link']);
   <?php endif; ?>
 
   <div<?php print $content_attributes; ?>>
-<?php if ($content['field_light_box_image']) : ?>
-  <div class="jeffkoons-artwork-box-0">
-  <?php print render ($content['field_light_box_image'][0]) ;?>
-  </div>
-<?php endif; ?>
+
+<!-- start GEO IP lookup -->
+
+<?php echo '<!-- current GEO IP country: '. $smart_ip_session['location']['country_code'] . ' -->';?>
+
+<?php if ($smart_ip_session['location']['country_code'] == 'FR') : ?>
+<!-- FR detected so do nothing and hide image -->
+<?php else: ?>
+
+	<?php if ($content['field_light_box_image']) : ?>
+  		<div class="jeffkoons-artwork-box-0">
+ 		 <?php print render ($content['field_light_box_image'][0]) ;?>
+  		</div>
+	<?php endif; ?>
+
+<?php endif; ?> <!-- end GEO IP lookup -->
 
   
     <header<?php print $header_attributes; ?>>
@@ -142,8 +155,13 @@ hide($content['field_exhibitions_link']);
   	<h3>Details</h3>
   	<div class="jeffkoons-accordion-container">
   		<div class="jeffkoons-artwork-thumbnails">
-  		<!--views : artwork & detail_thumbnails argument:-->
-  		<?php print views_embed_view('artwork', 'detail_thumbnails', $node->nid); ?>  	
+  		<!--views : artwork & detail_thumbnails argument:-->  
+  		<?php echo '<!-- current GEO IP country: '. $smart_ip_session['location']['country_code'] . ' -->';?>
+  		<?php if ($smart_ip_session['location']['country_code'] == 'FR') : ?>
+		<!-- FR detected so do nothing and hide image -->
+		<?php else: ?>
+  		<?php print views_embed_view('artwork', 'detail_thumbnails', $node->nid); ?> 
+  		<?php endif; ?> 		
      <div style="clear:both;"></div>  	
   	</div><!-- end: jeffkoons-artwork-thumbnails -->
   	<div class="jeffkoons-artwork-exhibitions">
