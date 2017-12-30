@@ -208,10 +208,10 @@ float:left;
 margin:0 5px 5px 0;
 }
 
-
 /*VIEWS*/
 /*Exhibitions Slide Show */
 
+/*
 .views-slideshow-controls-bottom {
 width:604px;
 clear:both;
@@ -227,9 +227,48 @@ margin:0 4px 10px 0;
 cursor: pointer;
 }
 
+/*
 #views_slideshow_cycle_main_exhibition_images_attachment-page img{
 height:380px;
 }
+*/
+
+/* 11-19-2017 quick fix */
+
+/* Pager Settings */
+.views-slideshow-controls-bottom {
+margin: 20px 0;
+}
+#widget_pager_bottom_exhibition_images_attachment-page_1{
+padding-top: 10px;
+}
+
+views-slideshow-pager-field-item{
+}
+
+
+.views-slideshow-pager-fields img {
+  max-width: auto !important;
+  max-height: auto !important;
+}
+
+.views-slideshow-pager-fields div {
+  display: inline;
+}
+
+.views-slideshow-pager-fields > div{
+  padding-left: 0px !important;
+}
+
+.views-slideshow-pager-fields .active img {
+  border: 1px solid #000 !important;
+}
+
+.views-slideshow-pager-fields .active {
+  text-decoration: none !important;
+}
+
+
 
 /*Artwork views */
 
