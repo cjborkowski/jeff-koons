@@ -82,13 +82,6 @@ if (isset($vars['node']->type)){
 
 }//end preprocss function
 
-
-/**
-function jeffkoonsstudio_process_page(&$vars) {
-}
-// */
-
-
 /**
  * Override or insert variables into the node templates.
  */
