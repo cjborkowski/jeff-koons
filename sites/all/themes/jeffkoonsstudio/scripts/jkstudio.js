@@ -122,4 +122,21 @@ $( '.jeffkoons-artwork-accordion ').accordion({
 
 //$(".image-style-380x-height").tooltip();
 
+//remove junk url's
+$('.editions-category-1 >a').attr("href", "/artwork/editions");
+
+//set font size
+$('.editions-link')
+    .filter(function() {
+        return this.id.match(/child-[1-99]/);
+    })
+    .css("font-size", "10px")
+;
+
+//wrap elements
+
+// make accordion
+//$('.jeffkoons-artwork-accordion-menu').accordion();
+
+
 }); //end doc ready
