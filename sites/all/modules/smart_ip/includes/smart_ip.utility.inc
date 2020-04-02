@@ -569,7 +569,7 @@ function smart_ip_maxmind_bin_db_update($license = '', $cron_run = FALSE, $force
 function smart_ip_maxmind_bin_db_up_to_date($version, $last_update_time) {
   $time_now = strtotime('midnight', REQUEST_TIME);
   if ($version == SMART_IP_MAXMIND_BIN_LICENSED_VERSION) {
-    $wednesday = strtotime('first Wednesday', $time_now);
+    $wednesday = strtotime('Wednesday this week', $time_now);
     if ($wednesday <= $time_now && $wednesday > $last_update_time) {
       return FALSE;
     }
