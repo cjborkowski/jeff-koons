@@ -19,12 +19,12 @@
 }
 
 /* Pager Settings */
-/* 11-19-2017 removed
+
 .views-slideshow-pager-fields img {
   max-width: 75px;
   max-height: 75px;
 }
-*/
+
 .views-slideshow-pager-fields div {
   display: inline;
 }

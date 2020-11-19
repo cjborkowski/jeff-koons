@@ -14,8 +14,8 @@
 function smart_ip_admin_settings($form, &$form_state) {
   $smart_ip_source = variable_get('smart_ip_source', 'ipinfodb_service');
 
-  // MaxMind's Apache module mod_geoip, X-GeoIP-Country: XX header and Cloudflare IP Geolocation don't support manual lookup and admin debug
-  if ($smart_ip_source == 'mod_geoip' || $smart_ip_source == 'x_header' || $smart_ip_source == 'cf_header') {
+  // MaxMind's Apache module mod_geoip, X-GeoIP-Country: XX header, EdgeScape and Cloudflare IP Geolocation don't support manual lookup and admin debug
+  if ($smart_ip_source == 'mod_geoip' || $smart_ip_source == 'x_header' || $smart_ip_source == 'es_header' || $smart_ip_source == 'cf_header') {
     $can_query_ip = FALSE;
   }
   else {
@@ -160,6 +160,7 @@ function smart_ip_admin_settings($form, &$form_state) {
       'maxmindgeoip2_bin'     => t("Use MaxMind GeoIP2 binary database. It is the evolution of MaxMind's original GeoIP binary database or now called GeoIP Legacy. This MaxMind's binary database uses a custom binary format to maximize lookup speed and accessible via two available APIs: !maxmind_db_reader_api which includes an optional C extension that you may install to dramatically increase the performance of lookups in GeoIP2 binary database and the default !geoip2_api. Lite version binary database can be downloaded !here. For licensed version, you will need to enter your license below and the binary database file can be downloaded !here2 (you will need to login to your MaxMind account first). The binary database is roughly 130MB, and there's an option below to enable the automatic download/extraction of it. The downloaded file %file_lite_city (if Lite version City edition) or %file_licensed_city (if Licensed version City edition) or %file_lite_country (if Lite version Country edition) or %file_licensed_country (if Licensed version Country edition) must be uploaded to your server at !path or to your defined custom path.", array('!maxmind_db_reader_api' => l(t('MaxMind DB Reader PHP API'), 'https://github.com/maxmind/MaxMind-DB-Reader-php'), '!geoip2_api' => l(t('GeoIP2 PHP API'), 'http://maxmind.github.io/GeoIP2-php'), '!here' => l(t('here'), 'https://dev.maxmind.com/geoip/geoip2/geolite2'), '!here2'      => l(t('here'), 'https://www.maxmind.com/en/download_files'), '%file_lite_city' => SMART_IP_MAXMIND_GEOIP2_FILENAME_LITE_CITY, '%file_licensed_city' => SMART_IP_MAXMIND_GEOIP2_FILENAME_LINCENSED_CITY, '%file_lite_country' => SMART_IP_MAXMIND_GEOIP2_FILENAME_LITE_COUNTRY, '%file_licensed_country' => SMART_IP_MAXMIND_GEOIP2_FILENAME_LINCENSED_COUNTRY, '!path' => $private_folder,)),
       'mod_geoip'             => t("Use MaxMind's Apache module mod_geoip... !read_more.", array('!read_more' => l(t('read more'), 'http://dev.maxmind.com/geoip/legacy/mod_geoip2'))),
       'x_header'              => t('Use the X-GeoIP-Country: XX header, set by e.g. nginx'),
+      'es_header'             => t('Use Akamai EdgeScape: your website must be using Akamai CDN and "EdgeScape Geolocation" option must be enabled at your !settings.', array('!settings' => l(t('Akamai settings'), 'https://control.akamai.com/apps/auth'))),
       'cf_header'             => t('Use Cloudflare IP Geolocation: your website must be using Cloudflare CDN and "IP Geolocation" option must be enabled at your !settings.', array('!settings' => l(t('Cloudflare settings'), 'https://www.cloudflare.com/cloudflare-settings'))),
     ),
     '#default_value' => variable_get('smart_ip_source', 'ipinfodb_service'),
@@ -427,18 +428,34 @@ function smart_ip_admin_settings($form, &$form_state) {
       ),
     ),
   );
+  
+  // Form for MaxMind GeoIP2 binary database user account
+  $form['smart_ip_data_source_selection']['smart_ip_maxmind_geoip2_bin_user_account'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('MaxMind user account'),
+    '#default_value' => variable_get('smart_ip_maxmind_geoip2_bin_user_account', ''),
+    '#description'   => t('Enter your MaxMind user account. This is required for lite version.'),
+    '#size'          => 30,
+    '#states'        => array(
+      'visible' => array(
+        ':input[name="smart_ip_source"]' => array('value' => 'maxmindgeoip2_bin'),
+        ':input[name="smart_ip_maxmind_geoip2_bin_version"]' => array('value' => SMART_IP_MAXMIND_BIN_LITE_VERSION),
+        ':input[name="smart_ip_maxmind_geoip2_bin_db_auto_update"]' => array('value' => '1'),
+      ),
+    ),
+  );
 
   // Form for MaxMind GeoIP2 binary database license key
   $form['smart_ip_data_source_selection']['smart_ip_maxmind_geoip2_license'] = array(
     '#type'          => 'textfield',
     '#title'         => t('MaxMind GeoIP2 license key'),
     '#default_value' => variable_get('smart_ip_maxmind_geoip2_license', ''),
-    '#description'   => t("Enter your MaxMind GeoIP2 account's license key (view your license key !here). This is required for licensed version.", array('!here' => l(t('here'), 'https://www.maxmind.com/en/my_license_key'))),
+    '#description'   => t("Enter your MaxMind GeoIP2 account's license key (view your license key !here). This is required for both lite and licensed version.", array('!here' => l(t('here'), 'https://www.maxmind.com/en/my_license_key'))),
     '#size'          => 30,
     '#states'        => array(
       'visible' => array(
         ':input[name="smart_ip_source"]' => array('value' => 'maxmindgeoip2_bin'),
-        ':input[name="smart_ip_maxmind_geoip2_bin_version"]' => array('value' => SMART_IP_MAXMIND_BIN_LICENSED_VERSION),
+        ':input[name="smart_ip_maxmind_geoip2_bin_db_auto_update"]' => array('value' => '1'),
       ),
     ),
   );
@@ -734,6 +751,9 @@ function smart_ip_admin_settings_validate($form, &$form_state) {
   if ($form_state['values']['smart_ip_source'] == 'x_header' && !isset($_SERVER['HTTP_X_GEOIP_COUNTRY'])) {
     form_set_error('smart_ip_source', t('Your server does not support X-header GeoIP functionality.'));
   }
+  if ($form_state['values']['smart_ip_source'] == 'es_header' && !isset($_SERVER['HTTP_X_AKAMAI_EDGESCAPE'])) {
+    form_set_error('smart_ip_source', t('Your site is not using Akamai CDN or your Akamai "EdgeScape Geolocation" is disabled.'));
+  }
   if ($form_state['values']['smart_ip_source'] == 'cf_header' && !isset($_SERVER['HTTP_CF_IPCOUNTRY'])) {
     form_set_error('smart_ip_source', t('Your site is not using Cloudflare CDN or your Cloudflare "IP Geolocation" is disabled.'));
   }
@@ -841,7 +861,10 @@ function smart_ip_admin_settings_validate($form, &$form_state) {
       }
     }
   }
-  if ($form_state['values']['smart_ip_source'] == 'maxmindgeoip2_bin' && empty($form_state['values']['smart_ip_maxmind_geoip2_license']) && $form_state['values']['smart_ip_maxmind_geoip2_bin_version'] == SMART_IP_MAXMIND_BIN_LICENSED_VERSION) {
+  if ($form_state['values']['smart_ip_source'] == 'maxmindgeoip2_bin' && empty($form_state['values']['smart_ip_maxmind_geoip2_bin_user_account']) && $form_state['values']['smart_ip_maxmind_geoip2_bin_version'] == SMART_IP_MAXMIND_BIN_LITE_VERSION && $form_state['values']['smart_ip_maxmind_bin_db_auto_update']) {
+    form_set_error('smart_ip_maxmind_geoip2_bin_user_account', t('Please provide MaxMind user account'));
+  }
+  if ($form_state['values']['smart_ip_source'] == 'maxmindgeoip2_bin' && empty($form_state['values']['smart_ip_maxmind_geoip2_license']) && $form_state['values']['smart_ip_maxmind_bin_db_auto_update']) {
     form_set_error('smart_ip_maxmind_geoip2_license', t('Please provide MaxMind GeoIP2 license key'));
   }
   if ($form_state['values']['smart_ip_source'] == 'maxmindgeoip2_bin') {

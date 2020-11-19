@@ -18,7 +18,7 @@
 define('SMART_IP_SOURCE_SMART_IP', 'smart_ip');
 define('SMART_IP_SOURCE_GEOCODED_SMART_IP', 'geocoded_smart_ip');
 define('SMART_IP_SOURCE_W3C', 'w3c');
-define('SMART_IP_MAXMIND_GEOIP2_LITE_BIN_DOWNLOAD_BASE_URL', 'https://geolite.maxmind.com/download/geoip/database');
+define('SMART_IP_MAXMIND_GEOIP2_LITE_BIN_DOWNLOAD_BASE_URL', 'https://download.maxmind.com/app/geoip_download');
 define('SMART_IP_MAXMIND_LITE_BIN_DOWNLOAD_BASE_URL', 'https://geolite.maxmind.com/download/geoip/database');
 define('SMART_IP_MAXMIND_LITE_CSV_DOWNLOAD_BASE_URL', 'https://geolite.maxmind.com/download/geoip/database/GeoLiteCity_CSV');
 define('SMART_IP_MAXMIND_GEOIP_BASE_URL', 'https://geoip.maxmind.com');
@@ -31,6 +31,8 @@ define('SMART_IP_MAXMIND_BIN_LICENSED_VERSION', 0);
 define('SMART_IP_MAXMIND_BIN_LITE_VERSION', 1);
 define('SMART_IP_MAXMIND_BIN_EDITION_CITY', 133);
 define('SMART_IP_MAXMIND_BIN_EDITION_COUNTRY', 106);
+define('SMART_IP_MAXMIND_GEOIP2_BIN_LITE_EDITION_CITY', 'GeoLite2-City');
+define('SMART_IP_MAXMIND_GEOIP2_BIN_LITE_EDITION_COUNTRY', 'GeoLite2-Country');
 define('SMART_IP_MAXMIND_GEOIP2_BIN_EDITION_CITY', 'GeoIP2-City');
 define('SMART_IP_MAXMIND_GEOIP2_BIN_EDITION_COUNTRY', 'GeoIP2-Country');
 define('SMART_IP_MAXMIND_GEOIP2_FILENAME_LITE_CITY', 'GeoLite2-City.mmdb');
@@ -845,6 +847,24 @@ function smart_ip_get_location($ip_address = NULL) {
     $result['latitude']     = '';
     $result['longitude']    = '';
     $result['time_zone']    = '';
+  }
+  elseif ($smart_ip_source == 'es_header') {
+    // Akamai EdgeScape IP Geolocation
+    module_load_include('inc', 'smart_ip', 'includes/smart_ip.country_list');
+    $countries = country_get_predefined_list();
+    if (isset($_SERVER['HTTP_X_AKAMAI_EDGESCAPE'])) {
+      parse_str(str_replace(',', '&', $_SERVER['HTTP_X_AKAMAI_EDGESCAPE']), $es_header);
+    }
+    $result['country_code'] = isset($es_header['country_code']) ? $es_header['country_code'] : '';
+    $result['country_code'] = strtoupper($result['country_code']);
+    $result['country']      = empty($result['country_code']) ? '' : $countries[$result['country_code']];
+    $result['region']       = isset($es_header['city']) ? $es_header['city'] : '';
+    $result['region_code']  = isset($es_header['region_code']) ? $es_header['region_code'] : '';
+    $result['city']         = isset($es_header['city']) ? $es_header['city'] : '';
+    $result['zip']          = isset($es_header['zip']) ? $es_header['zip'] : '';
+    $result['latitude']     = isset($es_header['lat']) ? $es_header['lat'] : '';
+    $result['longitude']    = isset($es_header['long']) ? $es_header['long'] : '';
+    $result['time_zone']    = isset($es_header['timezone']) ? $es_header['timezone'] : '';
   }
   elseif ($smart_ip_source == 'cf_header') {
     // Cloudflare IP Geolocation

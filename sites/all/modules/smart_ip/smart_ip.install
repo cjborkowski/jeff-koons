@@ -298,7 +298,8 @@ function smart_ip_uninstall() {
   variable_del('smart_ip_maxmind_bin_db_auto_update');
   variable_del('smart_ip_maxmind_bin_custom_path');
   variable_del('smart_ip_maxmind_geoip2_bin_db_last_update');
-  variable_del('smart_ip_maxmind_geoip2_bin_db_update_error');  
+  variable_del('smart_ip_maxmind_geoip2_bin_db_update_error');
+  variable_del('smart_ip_maxmind_geoip2_bin_user_account');
   variable_del('smart_ip_maxmind_geoip2_bin_version');
   variable_del('smart_ip_maxmind_geoip2_bin_edition');
   variable_del('smart_ip_maxmind_geoip2_license');
