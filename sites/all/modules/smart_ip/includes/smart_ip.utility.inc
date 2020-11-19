@@ -416,6 +416,7 @@ function smart_ip_maxmind_bin_db_update($license = '', $cron_run = FALSE, $force
     $last_update_time = strtotime('midnight', variable_get('smart_ip_maxmind_bin_db_last_update', 0));
   }
   elseif ($data_source == 'maxmindgeoip2_bin') {
+    $user_account = variable_get('smart_ip_maxmind_geoip2_bin_user_account', '');
     $license  = !empty($license) ? $license : variable_get('smart_ip_maxmind_geoip2_license', '');
     $version  = variable_get('smart_ip_maxmind_geoip2_bin_version', SMART_IP_MAXMIND_BIN_LICENSED_VERSION);  
     $edition  = variable_get('smart_ip_maxmind_geoip2_bin_edition', SMART_IP_MAXMIND_GEOIP2_BIN_EDITION_CITY);
@@ -453,7 +454,18 @@ function smart_ip_maxmind_bin_db_update($license = '', $cron_run = FALSE, $force
       $gz_name = "$path/$filename.dat.gz";
     }
     elseif ($data_source == 'maxmindgeoip2_bin') {
-      $url = SMART_IP_MAXMIND_GEOIP2_LITE_BIN_DOWNLOAD_BASE_URL . "/$filename.gz";
+      if ($edition == SMART_IP_MAXMIND_GEOIP2_BIN_EDITION_CITY) {
+        $edition = SMART_IP_MAXMIND_GEOIP2_BIN_LITE_EDITION_CITY;
+      }
+      else {
+        $edition = SMART_IP_MAXMIND_GEOIP2_BIN_LITE_EDITION_COUNTRY;
+      }
+      $url = SMART_IP_MAXMIND_GEOIP2_LITE_BIN_DOWNLOAD_BASE_URL . '?' . http_build_query(array(
+        'account_id' => $user_account,
+        'edition_id' => $edition,
+        'suffix' => 'tar.gz',
+        'license_key' => $license,
+      ));
       $gz_name = "$path/$filename.gz";
     }
   }
